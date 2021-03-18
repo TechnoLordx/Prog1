@@ -1,53 +1,96 @@
 #include "std_lib_facilities.h"
 
-class B1{
-public:
-	virtual void vf() { cout << "B1::vf\n"; }
-	void f() { cout << "B1::f\n"; }
-	virtual void pvf() =0; 
+// ha abstract az adott osztály még nincs teljesen megvalósítva. 
+// Absztrakt osztály emiatt nem példányosítható, csak ősosztály lehet.
+// Az absztraktként definiált metódusait a származtatott osztályban meg kell valósítani. 
+
+class B{
+public:							// pure virtual function csak abstract osztályban lehet
+	virtual void pvf() =0;		// tehát nem lehet példányosítani a tartalmazó osztályt
 };
 
-class D1 : public B1{
+class B1 : public B {
 public:
-	void vf() override { cout << "D1::fv\n"; }
-	void f() { cout << "D1::f\n"; }
-
+    virtual void vf() { cout << "B1::vf()\n"; }
+    void f() { cout << "B1::f()\n"; }
+    void pvf() { cout << "B1:pvf\n"; }
+    
 };
 
-class D2 : public D1
+class D1 : public B1 {
+public:
+    void vf() override { cout << "D1::vf()\n"; }
+    void f() { cout << "D1::f()\n"; }
+    void pvf() { cout << "D1:pvf\n"; }
+};
+
+class D2 : public D1 {
+public:
+    void pvf() override { cout << "D2::pvf()\n"; }
+};
+
+class B2{
+public:
+	virtual void pvf() =0;
+};
+
+class D21 : public B2 {
+public:
+	void pvf() override { cout << data << endl; }
+	string data = "D21 string data";
+};
+
+class D22 : public B2 {
+public:
+	int data = 404;
+	void pvf() override { cout << data << endl; }
+};
+
+void f( B2& b )
 {
-	void pvf() override { cout <<"D2::pvf\n"; }
-};
-
+	b.pvf();
+}
 
 
 int main()
-{
-	cout << "----------1---------\n";
+try{
+	cout << "----------B1---------\n";
 
 	B1 b;
 	b.vf();
 	b.f();
 
-	cout << "----------2---------\n";
+	cout << "----------D1---------\n";
 
 	D1 d;
 	d.vf();
 	d.f();
 
-	cout << "----------3---------\n";
+	cout << "----------B&---------\n";
 
-	B1& bref = d;
-	bref.vf();
-	bref.f();
+	B1& b_ref = d;
+	b_ref.vf();
+	b_ref.f();
+	b_ref.pvf();
 
-	cout << "----------4---------\n";
+	cout << "----------D2---------\n";
 
 	D2 d2;
 	d2.vf();
 	d2.f();
 	d2.pvf();
 
-	cout << "----------5---------\n";
+	cout << "----------D21-D22--------\n";
 
+	D21 d21;
+	D22 d22;
+
+	f(d21);
+	f(d22);
+
+
+}catch(exception& e){
+	cerr << e.what() << "\n";
+}catch(...){
+	cerr << "Hmm it didn't worked \n";
 }
