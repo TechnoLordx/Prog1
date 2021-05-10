@@ -1,4 +1,4 @@
-#ifndef GRAPH_GUARD
+ #ifndef GRAPH_GUARD
 #define GRAPH_GUARD
 
 #include "Point.h"
@@ -26,15 +26,15 @@ struct Color {
 	Color(Color_type cc): c(Fl_Color(cc)), v(visible) {}
 	Color(Color_type cc, Transparency vv): c(Fl_Color(cc)), v(vv) {}
 	Color(int cc): c(Fl_Color(cc)), v(visible) {}
-	Color(Transparency vv): c(Fl_Color()), v(vv) {}
+	Color(Transparency vv): c(Fl_Color()), v(vv) {} // alap értelmezett szin a fltk -be
 
 	int as_int() const { return c; }
 	char visibility() const { return v; }
 	void set_visibility(Transparency vv) { v = vv; }
 
 private:
-	unsigned char v;
-	Fl_Color c;
+	unsigned char v; // visibility
+	Fl_Color c; // fl tipus
 };
 
 struct Line_style {
@@ -53,12 +53,12 @@ struct Line_style {
 	int width() const { return w; }
 	int style() const { return s; }
 private:
-	int s;
-	int w;
+	int s; // stílus
+	int w; // vastagság
 };
 
 class Font {
-public:
+public: // publikus lessz az enum és így látjuk
 	enum Font_type {
 		helvetica=FL_HELVETICA,
 		helvetica_bold=FL_HELVETICA_BOLD,
@@ -77,17 +77,17 @@ public:
 		screen_bold=FL_SCREEN_BOLD,
 		zapf_dingbats=FL_ZAPF_DINGBATS
 	};
-
-	Font(Font_type ff) :f(ff) { }
+	// Font type paramétret várunk
+	Font(Font_type ff) :f(ff) { } // konstruktor
 	Font(int ff) :f(ff) { }
 
-	int as_int() const { return f; }
+	int as_int() const { return f; } // getter
 private:
 	int f;
 };
 
 struct Fill {
-	Fill() :no_fill(true), fcolor(0) { }
+	Fill() :no_fill(true), fcolor(0) { } // alapértelmezett nincs kitöltöszin
 	Fill(Color c) :no_fill(false), fcolor(c) { }
 
 	void set_fill_color(Color col) { fcolor = col; }
@@ -102,10 +102,10 @@ class Shape {
 public:
 	void draw() const;
 
-	virtual void move(int dx, int dy);
+	virtual void move(int dx, int dy); // futásidőben 
 
 	void set_color(Color col) { lcolor = col; }
-	Color color() const { return lcolor; }
+	Color color() const { return lcolor; } 
 
 	void set_style(Line_style sty) { ls = sty; }
 	Line_style style() const { return ls; }
@@ -116,17 +116,17 @@ public:
 	Point point(int i) const { return points[i]; }
 	int number_of_points() const { return int(points.size()); }
 
-	Shape(const Shape&) = delete;
-	Shape& operator=(const Shape&) = delete;
+	Shape(const Shape&) = delete; // letiltjuk a másoló konstuktort 
+	Shape& operator=(const Shape&) = delete;  // letiltjuk a másoló értékadást
 
-	virtual ~Shape() { }
+	virtual ~Shape() { } 
 
 protected:
-	Shape() {}
+	Shape() {}    	 // Pontok listája
 	Shape(initializer_list<Point> lst) { for (Point p : lst) add(p); }
 	void add(Point p) { points.push_back(p); }
 	void set_point(int i, Point p) { points[i] = p; }
-	virtual void draw_lines() const;
+	virtual void draw_lines() const;  // azért virtuális mert override olnia kell a hívofélnek
 	void clear_points() { points.clear(); }
 
 private:
@@ -136,54 +136,62 @@ private:
 	Color fcolor {Color::invisible};
 };
 
+//----------------------------------------
+
 template<class T> class Vector_ref {
 	vector<T*> v;
 	vector<T*> owned;
 public:
 	Vector_ref(){}
-	Vector_ref(T* a, T* b=0, T* c=0, T* d=0)
+	Vector_ref(T* a, T* b=0, T* c=0, T* d=0) // utolso 3 opcionális
 	{
-		if (a) push_back (a);
-		if (b) push_back (b);
+		if (a) push_back (a); // teszteljük hogyezek a pointerek nullpointerek e vagy nm
+		if (b) push_back (b);// ha nem nullpointer akkor hozzá adja
 		if (c) push_back (c);
 		if (d) push_back (d);
 	}
 	~Vector_ref(){ for (int i = 0; i < owned.size(); ++i) delete owned[i]; }
 
-	void push_back(T& s) { v.push_back(&s); }
+	void push_back(T& s) { v.push_back(&s); } // addressof opereator -ral elkérjük az első objektum címét
 	void push_back(T* p) { v.push_back(p); owned.push_back(p); }
 
 	T& operator[](int i){ return *v[i]; }
 	const T& operator[](int i) const { return *v[i]; }
-	int size() { return v.size(); }
+	int size() { return v.size(); } // v -t nm érjük el kivűlről
 };
 
 struct Line : Shape {
 	Line (Point p1, Point p2) { add(p1); add(p2);}
 };
 
+//-----------------------------------------
+
 struct Lines : Shape {
-	Lines(){}
-	Lines(initializer_list<Point> lst): Shape{lst} 
+	Lines(){}									  // Shap nek hívjuk ugyanezen konstuktorat
+	Lines(initializer_list<Point> lst): Shape{lst}// Shape nek van inicializáló listás konstruktora
 		{if ( lst.size() % 2 ) error("páratlan számú pontok");}
-	void draw_lines() const;
-	void add(Point p1, Point p2) { Shape::add(p1); Shape::add(p2); }
+	void draw_lines() const; // itt deklalráljuk
+	void add(Point p1, Point p2) { Shape::add(p1); Shape::add(p2); } // pont párokata adunk
 };
 
 struct Open_polyline : Shape {
-	using Shape::Shape;
+	/*
+	Open_polyline() {}
+	Open_polyline(initializer_list<Point> ls): Shape(lst) {}
+	*/
+	using Shape::Shape;  // a Shape osztály dolgait fogja örökőllni | itt is a konstuktorok protected 
 	void add(Point p) { Shape::add(p); }
 	void draw_lines() const;
 };
 
-struct Closed_polyline : Open_polyline {
+struct Closed_polyline : Open_polyline { // utolsó pontot hozzákötjuk az elsőhöz
 	using Open_polyline::Open_polyline;
 	void draw_lines() const;
 };
 
 struct Polygon : Closed_polyline {
 	using Closed_polyline::Closed_polyline;
-	void add(Point p);
+	void add(Point p); // deklaráljuk | hiba kezelni kell mert a Shape add jébe nincs 
 	void draw_lines() const;
 };
 
@@ -194,10 +202,10 @@ struct Rectangle : Shape {
 		if (h<=0 || w<=0) error("Nem jó oldalhossz.");
 		add(xy);
 	}
-	Rectangle(Point x, Point y): w{ y.x - x.x }, h{ y.y - x.y }
+	Rectangle(Point x, Point y): w{ y.x - x.x }, h{ y.y - x.y } // balfelső sarok és a jobbalsó sarok megadásával is
 	{
 		if (h<=0 || w<=0) error("Nem jó pontok.");
-		add(x);
+		add(x); // elég az x pont mert az y bol már kizámoltuk az oldalhoosszokat
 	}
 	
 	void draw_lines() const;
@@ -212,7 +220,7 @@ private:
 struct Text : Shape {
 private:
 	string lab;
-	Font fnt { fl_font() };
+	Font fnt  { fl_font() };
 	int fnt_sz { 14<fl_size() ? fl_size() : 14 };
 public:
 	Text(Point x, const string& s): lab {s} { add(x); }
@@ -235,7 +243,7 @@ private:
 	int r;
 public:
 	Circle(Point p, int rr): r{rr} {
-		add(Point{ p.x-r, p.y-r });
+		add(Point{ p.x-r, p.y-r }); // eltoljuk r -rel 
 	}
 
 	void draw_lines() const;
@@ -244,6 +252,16 @@ public:
 
 	void set_radius(int rr) { r=rr; }
 	int radius() const { return r; }
+};
+
+struct Ellipse : Shape{
+	Ellipse(Point p, int ww , int hh): w{ww}, h{hh}
+	{ add(Point{p.x-ww, p.y-hh}); }
+
+	void draw_lines() const;
+
+private:
+	int w,h;
 };
 
 struct Marked_polyline : Open_polyline
@@ -262,13 +280,13 @@ struct Marks : Marked_polyline
 };
 
 struct Mark : Marks
-{
+{					// az ösosztály konstuktorát delegáljuk 
 	Mark(Point xy, char c) : Marks(string(1,c)) { add(xy); }
 };
 
 struct Bad_image : Fl_Image {
 	Bad_image(int h, int w) : Fl_Image(h,w,0) { }
-	void draw(int x, int y, int, int, int, int) { draw_empty(x,y); }
+	void draw(int x, int y, int, int, int, int) { draw_empty(x,y); } // a fltk -ban  a draw empty mondja meg hogy üresképet rajoljunk
 };
 
 struct Suffix {
@@ -279,20 +297,20 @@ Suffix::Encoding get_encoding(const string& s);
 
 struct Image : Shape {
 private:
-	int w, h, cx, cy;
+	int w, h, cx, cy; // cx, cy maszkoláshoz kell
 	Fl_Image* p;
 	Text fn;
 public:
 	Image(Point xy, string s, Suffix::Encoding e = Suffix::none);
 	~Image() { delete p; }
-	void draw_lines() const;
-	void set_mask(Point xy, int ww, int hh) { w = ww; h = hh; cx=xy.x; cy=xy.y; }
+	void draw_lines() const;			//	menniyt rajoljon // melyik pontol rajzoljuk ki cx cy 
+	void set_mask(Point xy, int ww, int hh) { w = ww; h = hh; cx=xy.x; cy=xy.y; } // levágunk a képből
 	void move(int dx, int dy) { Shape::move(dx,dy); p->draw(point(0).x,point(0).y); }
 };
 
 typedef double Fct(double);
 
-struct Function : Shape {
+struct Function : Shape {													// skálázás
 	Function(Fct f, double r1, double r2, Point orig, int count = 100, double xscale = 25, double yscale = 25);
 };
 
@@ -323,7 +341,7 @@ private:
 
 
 struct Axis : Shape {
-	enum Orientation { x, y, z };
+	enum Orientation { x, y, z }; // meg adjuk az irányultságot Axis::x 
 	Axis (Orientation d, Point xy, int length, int number_of_notches = 0, string label = "");
 	void draw_lines() const;
 	void move(int dx, int dy);

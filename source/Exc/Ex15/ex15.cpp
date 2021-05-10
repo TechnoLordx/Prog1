@@ -32,27 +32,32 @@ try{
 	Axis y(Axis::y,Point(300,500),400,20,"1 == 20 pixels");
 	win.attach(x);
 	win.attach(y);
+	win.set_label("ch15_exe");
 	win.wait_for_button();
 
-	Fv asd(one,-10,11,Point(300,300),400, 10 ,30);
-	// one magasság, balra -10, jobbra 11, az origotol, 10 hossz
-	win.attach(asd);
+	Fv f1(one,-10,11,Point(300,300),400, 10 ,30);
+
+	win.attach(f1);
+	win.set_label("ch15_exe");
 	win.wait_for_button();
 
 
-	asd.reset_xscale(20);
-//	asd.reset_yscale(20); 
+	f1.reset_xscale(20);
+	f1.reset_yscale(20); 
+	win.set_label("ch15_exe");
 	win.wait_for_button();
 
-	asd.reset_fct(sloping_cos); // megváltoztatja a függvényt
-	asd.reset_orig(Point(350,250)); // lehet állítani új origo-t
+	f1.reset_fct(sloping_cos); // megváltoztatja a fv -t
+	f1.reset_orig(Point(350,250)); // reset origó
+	win.set_label("ch15_exe");
 	win.wait_for_button();
 
-	asd.reset_range(-8,8);
+	f1.reset_range(-8,8);
+	win.set_label("ch15_exe");
 	win.wait_for_button();
 
-	asd.reset_precision(8); // mennyire legyen precíz
-							// minnél nagyobb a szám annál kevésbé precíz
+	f1.reset_precision(8); 
+	win.set_label("ch15_exe");// x > --> pontatlanabb
 	win.wait_for_button();
 
 

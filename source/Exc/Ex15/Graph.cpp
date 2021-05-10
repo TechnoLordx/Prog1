@@ -33,7 +33,7 @@ bool line_segment_intersect(Point p1, Point p2, Point p3, Point p4, Point& inter
    return true;
 } 
 
-//class Shape's functions
+//Shape osztály fv je
 void Shape::draw_lines() const
 {
 	if (color().visibility() && 1<points.size())
@@ -51,15 +51,15 @@ void Shape::move(int dx, int dy)
 
 void Shape::draw() const
 {
-	Fl_Color oldc = fl_color();
-	fl_color(lcolor.as_int());
-	fl_line_style(ls.style(), ls.width());
-	draw_lines();
-	fl_color(oldc);
+	Fl_Color oldc = fl_color(); // eltároljuk az aktuális colort amit majd vissaz is adunk
+	fl_color(lcolor.as_int()); //ekkérjük 
+	fl_line_style(ls.style(), ls.width()); // beállítjuk a line_style t | lekérdezzük az aktuális vonal stilust és beállítjuk
+	draw_lines(); // aktuális objektum tipusnak a draw_lines foghívodni
+	fl_color(oldc);// vissza álitjuk a szint
 	fl_line_style(0);
 }
 
-void Lines::draw_lines() const
+void Lines::draw_lines() const // Lines osztálynak a draw lines fv je  
 {
 	if (color().visibility())
 		for (int i = 1; i < number_of_points(); i+=2)
@@ -69,24 +69,24 @@ void Lines::draw_lines() const
 void Open_polyline::draw_lines() const
 {
 		if (fill_color().visibility()) {
-			fl_color(fill_color().as_int());
-			fl_begin_complex_polygon();
-			for(int i=0; i<number_of_points(); ++i){
-				fl_vertex(point(i).x, point(i).y);
+			fl_color(fill_color().as_int()); // itt elkérjük a fill_colort az as_int() -el  
+			fl_begin_complex_polygon();		 // Ezzel jelezük a fltk nak hogy elkezdjük
+			for(int i=0; i<number_of_points(); ++i){ // pontrol pontra haladunk
+				fl_vertex(point(i).x, point(i).y);	 // a vertex nél elég egypontot megadni mert az előzőt tudja és abbol fogja majd húzni az élt
 			}
 			fl_end_complex_polygon();
-			fl_color(color().as_int());
+			fl_color(color().as_int()); // alapértelmezetre állitjuk a szint 
 		}
 		
-		if (color().visibility())
+		if (color().visibility()) // ha látható hivjuk az ősoszály draw fv -jt
 			Shape::draw_lines();
 }
 
 void Closed_polyline::draw_lines() const
 {
-	Open_polyline::draw_lines();
+	Open_polyline::draw_lines(); // meghíjuk
 
-	if (color().visibility())
+	if (color().visibility()) // utolso és elso között huzz egy vonalat
 		fl_line(point(number_of_points()-1).x, point(number_of_points()-1).y, point(0).x, point(0).y);
 }
 
@@ -94,21 +94,21 @@ void Polygon::add(Point p)
 {
 	int np = number_of_points();
 
-	if (1<np) {
+	if (1<np) { // több pontunk van e mint 1
 		if (p==point(np-1)) error("Ugyanaz mint az előző pont");
-		bool parallel;
-		line_intersect(point(np-1),p,point(np-2),point(np-1),parallel);
-		if (parallel)
+		bool parallel; // párhuzamos
+		line_intersect(point(np-1),p,point(np-2),point(np-1),parallel); // line_intersect egybe esnek e a pontok megnézi
+		if (parallel) // ha párhuzamos kivétel
 			error("két poligon pont ugyanazon a vonalon");
 	}
 
 	for (int i = 1; i<np-1; ++i) {
-		Point ignore(0,0);
+		Point ignore(0,0); // teszteléshez kell
 		if (line_segment_intersect(point(np-1),p,point(i-1),point(i),ignore))
 			error("kereszteződés");
 	}
 	
-
+	// ha rendbe van akkor hivjuk az ösosztály add fv jét
 	Closed_polyline::add(p);
 }
 
@@ -120,13 +120,13 @@ void Polygon::draw_lines() const
 }
 
 void Rectangle::draw_lines() const
-{
+{// ha van kitöltés
 	if (fill_color().visibility()){
 		fl_color(fill_color().as_int());
-		fl_rectf(point(0).x, point(0).y, w, h);
-		fl_color(color().as_int());
+		fl_rectf(point(0).x, point(0).y, w, h);// balfelső sarok , w,h
+		fl_color(color().as_int()); // vissza állítjuk a szint
 	}
-
+// nincs kitöltés csak vonal
 	if (color().visibility()){
 		fl_color(color().as_int());
 		fl_rect(point(0).x, point(0).y, w, h);
@@ -137,31 +137,47 @@ void Text::draw_lines() const
 {
 	int ofnt = fl_font();
 	int osz = fl_size();
-	fl_font(fnt.as_int(), fnt_sz);
-	fl_draw(lab.c_str(), point(0).x, point(0).y);
-	fl_font(ofnt, osz);
+	fl_font(fnt.as_int(), fnt_sz); //ez azért kell hogy beparaméterezzük magát a libraryt
+	fl_draw(lab.c_str(), point(0).x, point(0).y); // c_str a stringet átalakítja karakter pointerre
+	fl_font(ofnt, osz);//vissza állítjuk 
 }
 
 void Circle::draw_lines() const
-{
+{// ha van kitöltés
 	if (fill_color().visibility()){
 		fl_color(fill_color().as_int());
 		fl_pie(point(0).x, point(0).y, r+r-1, r+r-1, 0, 360);
 		fl_color(color().as_int());
 	}
-
+// nincs kitöltés csak vonal
 	if (color().visibility()){
 		fl_color(color().as_int());
 		fl_arc(point(0).x, point(0).y, r+r, r+r, 0, 360);
 	}
 }
 
+void Ellipse::draw_lines() const
+{// ha van kitöltés
+	if (fill_color().visibility())
+	{
+		fl_color(fill_color().as_int());
+		fl_pie(point(0).x, point(0).y, w+w-1, h+h-1, 0, 360);
+		fl_color(color().as_int());
+	}
+// nincs kitöltés csak vonal
+	if (color().visibility()){
+		fl_color(color().as_int());
+		fl_arc(point(0).x, point(0).y, w+w, h+h, 0, 360);
+	}
+}
+
+
 void draw_mark(Point x, char c){
 	
 	static const int dx = 4;
 	static const int dy = 4;
 	string m(1,c);
-	fl_draw(m.c_str(), x.x-dx,x.y-dy);
+	fl_draw(m.c_str(), x.x-dx,x.y-dy); // fl_draw lehet szöveget kiirni
 
 }
 
@@ -169,15 +185,15 @@ void Marked_polyline::draw_lines() const
 {
 	Open_polyline::draw_lines();
 	for( int i = 0; i < number_of_points(); ++i)
-		draw_mark(point(i), mark[i%mark.size()]);
-}
+		draw_mark(point(i), mark[i % mark.size()]);
+}		// átadjuk a torespont koordinatajat (i) |  és atadjuk neki azt a betűt ahol vagyunk
 
 std::map<string,Suffix::Encoding> suffix_map;
 
 int init_suffix_map()
 {
-	suffix_map["jpg"] = Suffix::jpg;
-	suffix_map["JPG"] = Suffix::jpg;
+	suffix_map["jpg"] = Suffix::jpg; 
+	suffix_map["JPG"] = Suffix::jpg; // suffix alapján fogjuk majd a képeket kezelni
 	suffix_map["jpeg"] = Suffix::jpg;
 	suffix_map["JPEG"] = Suffix::jpg;
 	suffix_map["gif"] = Suffix::gif;
@@ -189,18 +205,17 @@ int init_suffix_map()
 
 Suffix::Encoding get_encoding(const string& s)
 {
-	static int x = init_suffix_map();
-
-	string::const_iterator p = find(s.begin(),s.end(),'.');
-	if (p==s.end()) return Suffix::none;
-
-	string suf(p+1,s.end());
+	static int x = init_suffix_map();	
+															// megnézzük itt, hogy mi a kiterjesztés
+	string::const_iterator p = find(s.begin(),s.end(),'.'); // megkeressük a pontot és vissza tér egy iterátor tipussal
+	if (p==s.end()) return Suffix::none;   // nincs
+	string suf(p+1,s.end()); // a p + 1 től másolja ki a végéig -> létrejön egy string
 	return suffix_map[suf];
 }
 
 bool can_open(const string& s){
 	ifstream ff(s.c_str());
-	return ff.is_open();
+	return ff.is_open();  // return bool 
 }
 
 Image::Image(Point xy, string s, Suffix::Encoding e)
@@ -209,16 +224,16 @@ Image::Image(Point xy, string s, Suffix::Encoding e)
 	add(xy);
 
 	if (!can_open(s)){
-		fn.set_label("Nem nyithato a file!");
-		p = new Bad_image(30,20);
+		fn.set_label("Nem nyithato meg a file!");
+		p = new Bad_image(30,20); // p kép tag
 		return;
 	}
 
-	if (e == Suffix::none) e = get_encoding(s);
-/*
+	if (e == Suffix::none) e = get_encoding(s); // ha nem adjuk meg a konstruktorba akkor itt kérjük el
+
 	switch(e){
 		case Suffix::jpg:
-		p = new Fl_JPEG_Image(s.c_str());
+		p = new Fl_JPEG_Image(s.c_str()); // karakter pointer
 		break;
 		case Suffix::gif:
 		p = new Fl_GIF_Image(s.c_str());
@@ -228,7 +243,7 @@ Image::Image(Point xy, string s, Suffix::Encoding e)
 		p = new Bad_image(30,20);
 	}
 
-*/
+
 }
 
 void Image::draw_lines() const
@@ -236,26 +251,25 @@ void Image::draw_lines() const
 	if (fn.label() != "") fn.draw_lines();
 
 	if (w && h){
-		p->draw(point(0).x, point(0).y, w, h, cx, cy);
+		p->draw(point(0).x, point(0).y, w, h, cx, cy); // set_mask
 	}
 	else {
-		p->draw(point(0).x, point(0).y);
+		p->draw(point(0).x, point(0).y); // full image
 	}
 }
 
 Function::Function(Fct f, double r1, double r2, Point xy, int count, double xscale, double yscale){
 	if (r2-r1<=0) error ("Rossz range!");
 	if (count<=0) error ("Rossz count!");
-	double dist = (r2-r1)/count;
-	double r = r1;
+	double dist = (r2-r1)/count; // lépésköz 
+	double r = r1; // ehhez az r -hez fogjuk majd hozzáadni a "dist" -t | az x et foglya meghatározni
 	for (int i = 0; i < count; ++i){
-		add(Point(xy.x+int(r*xscale), xy.y-int(f(r)*yscale)));
-		r += dist;
+		add(Point(xy.x+int(r*xscale), xy.y-int(f(r)*yscale))); // xy.x+int(r*xscale) r -rel elkell tolnunk de van még egy xscale faktor így ezzel meg kell szorozni
+		r += dist;	// r -t eltoljuk dist -el				  // xy.y-int(f(r)*yscale)) f(r) -rel kell eltolni mert hivnunk kell a fv arra az x koordinátára és még *yscale
 	}
 }
 
-Fv::Fv(Fct f, double r1, double r2, Point xy, int cnt,
-			 double xsc, double ysc, double prec)
+Fv::Fv(Fct f, double r1, double r2, Point xy, int cnt, double xsc, double ysc, double prec)
     :Function(f,r1,r2,xy,cnt,xsc,ysc), fct(f), 
     range1(r1), range2(r2), origin(xy),
      count(cnt), xscale(xsc), yscale(ysc), precision(prec)
@@ -287,15 +301,15 @@ void Fv::reset_xscale(double xsc)
 
 	reset();
 }
-/*
-void Fv::reset_yscale(int ysc)
+
+void Fv::reset_yscale(double ysc)
 {
 	if(ysc == 0) error("Az yscale értéke nem lehet nulla");
 	yscale = ysc;
 
 	reset();
 }
- */
+
 void Fv::reset()
 {
 	double dist = (range2 - range1)/count;
@@ -309,7 +323,7 @@ void Fv::reset()
 		r += dist;
 	}
 }
-
+						// origo
 Axis::Axis(Orientation d, Point xy, int length, int n, string lab )
 	:label(Point(0,0), lab)
 {
@@ -320,7 +334,7 @@ Axis::Axis(Orientation d, Point xy, int length, int n, string lab )
 			Shape::add(xy);
 			Shape::add(Point(xy.x+length, xy.y));
 			if (1<n){
-				int dist = length/n;
+				int dist = length/n; // lépésköz
 				int x = xy.x+dist;
 				for (int i = 0; i < n; ++i){
 					notches.add(Point(x, xy.y), Point(x, xy.y-5));
@@ -352,7 +366,7 @@ Axis::Axis(Orientation d, Point xy, int length, int n, string lab )
 
 void Axis::draw_lines() const
 {
-	Shape::draw_lines();
+	Shape::draw_lines(); // ősosztály draw lines fv je
 	notches.draw();
 	label.draw();
 }
@@ -370,7 +384,7 @@ void Axis::move(int dx, int dy)
 	notches.move(dx, dy);
 	label.move(dx, dy);
 }
-//---------------------------------
+//---------------Exc------------------
 void Arc::draw_lines() const{
 	int w = radius + radius;
 	int h = w;

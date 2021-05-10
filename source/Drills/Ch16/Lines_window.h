@@ -14,7 +14,7 @@ struct Lines_window : Graph_lib::Window
 	Button menu_button;
 	Button line_style_menu_button;
 
-// kolbászback
+
 	static void cb_red(Address, Address);
 	static void cb_blue(Address, Address);
 	static void cb_black(Address, Address);

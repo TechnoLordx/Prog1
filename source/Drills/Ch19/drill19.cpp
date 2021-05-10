@@ -3,8 +3,8 @@
 template<typename T>
 struct S {
 
-    S(T vall = T()) : val(vall) {}
-
+    S(T vall = T()) : val(vall) {} // T() => default konstruktor kell ide | ":" után amásolás történik
+                                  // Fontos, hogy másolható legyen a tipus
     T& get();
     T get() const { return val; } // getter fv 
     //T set_val(T newee) { val = newee; }
@@ -33,7 +33,7 @@ try {
     S<char> abc {'x'};
     S<double> tort {69.6969};
     S<string> szoveg {"cica"};
-    S<vector<int>> tarolo {{1, 2, 3, 4, 5, 6 }};
+    S<vector<int>> tarolo {{ 1, 2, 3, 4, 5, 6 }};
 
     // 4-es feladat
     //cout << szam.val << " " << abc.val << " " << tort.val << " " << szoveg.val << endl;

@@ -1,9 +1,9 @@
 #include "Lines_window.h"
 
-Lines_window::Lines_window(Point xy, int w, int h, const string& title)  
-    : Window{xy, w, h, title},
+Lines_window::Lines_window(Point xy, int w, int h, const string& title)
+    :Window{xy, w, h, title},
     next_button{Point{x_max()-300, 0}, 150, 40, "Next point",
-        [](Address, Address pw) { reference_to<Lines_window>(pw).next(); }}, // ez itt tulajdonképpen a kolbászback | 
+        [](Address, Address pw) { reference_to<Lines_window>(pw).next(); }}, 
     quit_button{Point{x_max()-150, 0}, 150, 40, "Quit",
         [](Address, Address pw) { reference_to<Lines_window>(pw).quit(); }}, 
     next_x{Point{300, 0}, 50, 40, "next x:"},
@@ -48,16 +48,16 @@ void Lines_window::quit()
 
 void Lines_window::next()
 {
-    int x = next_x.get_int(); // amint beirunk azt adja oda | Inbox::get_int()
+    int x = next_x.get_int(); // amint beirunk azt adja oda
     int y = next_y.get_int();
 
-    lines.add(Point{x,y}); // Open poly line add fv je
+    lines.add(Point{x,y});
 
     ostringstream ss;
     ss << '(' << x << ',' << y << ')';
-    xy_out.put(ss.str()); // itt alakitjuk át | 
+    xy_out.put(ss.str());
 
-    redraw(); // ujra kirajzolja
+    redraw(); // rajzol
 }
 
 void Lines_window::cb_red(Address, Address pw)

@@ -41,7 +41,7 @@ void Out_box::put(int i)
 	po.value(ss.str().c_str());
 }
 
-void Out_box::put(const string& s) // 2 szamot átalakítjuk string re
+void Out_box::put(const string& s)
 {
 	reference_to<Fl_Output>(pw).value(s.c_str());
 }
